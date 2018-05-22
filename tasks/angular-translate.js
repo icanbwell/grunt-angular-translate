@@ -18,6 +18,8 @@ module.exports = function (grunt) {
     var _ = require('lodash');
     var _log = grunt.log;
     var _file = grunt.file;
+    // Library used to decode html in translation keys
+    var he = require('he');
 
     // Check lang parameter
     if (!_.isArray(this.data.lang) || !this.data.lang.length) {
@@ -123,7 +125,15 @@ module.exports = function (grunt) {
               key.forEach(function(item){
                 item = item.replace(/\\\"/g, '"').trim();
                 if (item !== '') {
-                  results[item] = translationDefaultValue;
+
+                  // Decode html
+                  item = he.decode(item);
+
+                  if (keyAsText === true && translationDefaultValue.length === 0) {
+                    results[item] = item;
+                  } else {
+                    results[item] = translationDefaultValue;
+                  }
                 }
               });
               break;
@@ -140,6 +150,10 @@ module.exports = function (grunt) {
           var defaultValueByTranslationKey = function (translationKey, translationDefaultValue) {
             if (regexName !== "JavascriptServiceArraySimpleQuote" &&
               regexName !== "JavascriptServiceArrayDoubleQuote") {
+
+              // Decode html
+              translationKey = he.decode(translationKey);
+
               if (keyAsText === true && translationDefaultValue.length === 0) {
                 results[translationKey] = translationKey;
               } else {
